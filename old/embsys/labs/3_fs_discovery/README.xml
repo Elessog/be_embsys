@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<?asciidoc-toc?>
+<?asciidoc-numbered?>
+
+<article lang="en">
+<articleinfo>
+    <title>TP3 : À la découverte du Filesystem</title>
+    <author>
+        <firstname>Blottière</firstname>
+        <surname>Paul</surname>
+        <email>blottiere.paul@gmail.com</email>
+    </author>
+    <authorinitials>BP</authorinitials>
+</articleinfo>
+<section id="_généralités">
+<title>Généralités</title>
+<section id="_embsys">
+<title>embsys</title>
+<simpara>L&#8217;ensemble des cours, exemples, PDF et TP est disponible sur le dépôt
+github <ulink url="https://github.com/pblottiere/embsys">https://github.com/pblottiere/embsys</ulink>.</simpara>
+<simpara>Si vous voulez cloner entièrement le dépôt :</simpara>
+<screen>$ git clone https://github.com/pblottiere/embsys</screen>
+<simpara>Si vous voulez cloner le dépôt mais avoir simplement les labs dans votre
+répertoire de travail :</simpara>
+<screen>$ git clone -n https://github.com/pblottiere/embsys --depth 1
+$ cd embsys
+$ git checkout HEAD labs</screen>
+<simpara>Si vous souhaitez mettre à jour un dépôt que vous avez préalablement cloné :</simpara>
+<screen>$ cd embsys
+$ git pull</screen>
+<simpara>Si vous n&#8217;avez pas <emphasis role="strong">git</emphasis>, téléchargez le ZIP sur la page d&#8217;acceuil de <emphasis role="strong">embsys</emphasis>.</simpara>
+<simpara>Le TP d&#8217;aujourd&#8217;hui se trouve ici : <ulink url="https://github.com/pblottiere/embsys/labs/3_fs_discovery">https://github.com/pblottiere/embsys/labs/3_fs_discovery</ulink>.</simpara>
+</section>
+<section id="_objectifs_du_tp">
+<title>Objectifs du TP</title>
+<simpara>Dans le cadre de ce TP, nous allons partir à la découverte des éléments présents
+au sein  du filesystem en parcourant :</simpara>
+<itemizedlist>
+<listitem>
+<simpara>
+/boot
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+/dev
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+/etc
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+/proc
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+/sys
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+/var
+</simpara>
+</listitem>
+</itemizedlist>
+<simpara>Nous allons réaliser des exercices afin de mettre en avant les circonstances
+dans lesquelles vous seriez susceptible d&#8217;avoir besoin de travailler dans ces
+répertoires.</simpara>
+<simpara>Lors de ce TP, vous aurez les droits <emphasis role="strong">root</emphasis>. Vous devez donc être
+particulièrement <emphasis role="strong">VIGILANT</emphasis> à ce que vous faites ainsi qu&#8217;aux consignes des
+exercices afin de ne pas faire d&#8217;erreurs malencontreuses&#8230;</simpara>
+<simpara>Il existe une règle simple pour éviter de telles erreurs : ne jamais être
+identifié root lorsque ce n&#8217;est pas nécessaire! Il ne s&#8217;agit donc pas ici
+d'être en root tout le long du TP&#8230;</simpara>
+</section>
+</section>
+<section id="_exercice_1_boot_grub_et_initramfs">
+<title>Exercice 1 : /boot, GRUB et initramfs</title>
+<simpara>En fonction des machines que vous rencontrerez, le répertoire /boot pourra
+contenir des éléments différents, mais un certain nombre sont relativement
+génériques :</simpara>
+<itemizedlist>
+<listitem>
+<simpara>
+config-&lt;KERNEL_VERSION&gt;
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+initrd.img-&lt;KERNEL_VERSION&gt;
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+vmlinuz-&lt;KERNEL_VERSION&gt;
+</simpara>
+</listitem>
+</itemizedlist>
+<simpara>Dans le cas d&#8217;utilisation de GRUB comme bootloader, un répertoire /boot/grub
+est aussi présent.</simpara>
+<simpara>Afin d&#8217;obtenir la valeur de &lt;KERNEL_VERSION&gt; :</simpara>
+<screen>&gt; uname -r
+4.2.0-1-amd64
+&gt; ls /boot/config-*$(uname -r)
+/boot/config-4.2.0-1-amd64</screen>
+<simpara><emphasis role="strong">Question 1</emphasis> : <emphasis>En se renseignant sur le net et grâce aux notions vues en cours,
+                expliquez ce que sont les fichiers <emphasis role="strong">config-</emphasis>, <emphasis role="strong">initrd.img-</emphasis> et
+                <emphasis role="strong">vmlinuz-</emphasis>.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 2</emphasis> : <emphasis>En analysant le fichier /boot/grub/grub.cfg, déterminez quelle
+               commande lance le kernel et quelle est celle qui charge l&#8217;initrd.</emphasis></simpara>
+<simpara>En analysant le fichier /boot/grub/grub.cfg, on remarque que le kernel
+prend plusieurs paramètres.</simpara>
+<simpara><emphasis role="strong">Question 3</emphasis> : <emphasis>Expliquez l&#8217;utilité des paramètres <emphasis role="strong">root</emphasis>, <emphasis role="strong">quiet</emphasis> et <emphasis role="strong">splash</emphasis>
+                passés au kernel.</emphasis></simpara>
+<simpara>Dans le menu GRUB au démarrage de la machine, on peut, grâce à la touche <emphasis role="strong">e</emphasis>,
+rentrer dans la configuration du boot. De cette manière, on peut changer
+ponctuellement pour le prochain boot :</simpara>
+<itemizedlist>
+<listitem>
+<simpara>
+les paramètres à passer au kernel
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+l&#8217;initrd à charger en mémoire
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+les messages à afficher au boot
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+&#8230;
+</simpara>
+</listitem>
+</itemizedlist>
+<simpara><emphasis role="strong">Question 4</emphasis> : <emphasis>Rebootez la machine et notez les phases de boot. Regardez le
+               contenu du fichier /proc/cmdline.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 5</emphasis> : <emphasis>Rebootez la machine et cette fois rentrez dans la configuration
+               du grub grâce à la touche <emphasis role="strong">e</emphasis>. Modifiez les paramètres passés au
+               kernel pour ne garder que <emphasis role="strong">root=UUID=XXXXXXXXXXXX</emphasis> et <emphasis role="strong">ro</emphasis>.
+               Démarrez. Quel changements y a t-il eu par rapport au boot
+               précédent? Qu&#8217;y a t-il dans le fichier /proc/cmdline?</emphasis></simpara>
+<simpara>Nous allons maintenant étudier le fichier de configuration du kernel
+<emphasis role="strong">/boot/config-&lt;VERSION&gt;</emphasis>.</simpara>
+<simpara><emphasis role="strong">Question 6</emphasis> : <emphasis>À quel stade ce fichier de configuration est-il utilisé?</emphasis></simpara>
+<simpara><emphasis role="strong">Question 7</emphasis> : <emphasis>Comment voit on que le kernel Linux est un noyau modulaire
+               seulement en analysant le fichier de configuration?</emphasis></simpara>
+<simpara><emphasis role="strong">Question 8</emphasis> : <emphasis>En étudiant le fichier de configuration du kernel, déterminez
+               si l&#8217;interface sysfs est disponible pour les GPIO. Vérifiez.</emphasis></simpara>
+<simpara>Depuis la version 2.6 de Linux, le fichier /boot/initrd.img- est une archive
+cpio compressée : c&#8217;est la notion d&#8217;initramfs. L&#8217;archive compressée chargée en
+RAM par le bootloader est ensuite décompressée par le kernel afin qu&#8217;un RFS
+minimal soit disponible en RAM. Ce RFS contient tout le nécessaire pour
+réaliser la phase de boot du kernel. Les avantages d&#8217;une telle technique sont :</simpara>
+<itemizedlist>
+<listitem>
+<simpara>
+la possiblité de paramétrer le boot de manière simple
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+l&#8217;initialisation du kernel dans un espace utilisateur minimal, permettant
+      d&#8217;avoir accès à la libc ainsi qu'à des utilitaires de base
+</simpara>
+</listitem>
+</itemizedlist>
+<simpara>Une telle image peut être décompressée comme suit :</simpara>
+<screen>&gt; gunzip -dc &lt; initrd.img | cpio -id</screen>
+<simpara>Pour compresser :</simpara>
+<screen>&gt; find ./ | cpio -H newc -o &gt; ../custom.cpio
+&gt; cd ..
+&gt; gzip custom.cpio
+&gt; mv custom.cpio.gz custom.img</screen>
+<simpara><emphasis role="strong">Question 9</emphasis> : <emphasis>Copiez l&#8217;initrd du /boot dans un répertoire de travail et
+                décompressez la.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 10</emphasis> : <emphasis>Où se trouve la libc dans le RFS décompressé? Quel type de
+                libc est-ce (glibc, uclibc, elibc, &#8230;)?</emphasis></simpara>
+<simpara>Dans le RFS décompressé, il existe un fichier <emphasis role="strong">init</emphasis> à sa racine. Ce fichier est
+exécuté par le kernel pour lancer la phase de démarrage, dont le premier
+processus (PID=1) /sbin/init.</simpara>
+<simpara><emphasis role="strong">Question 11</emphasis> : <emphasis>En analysant le fichier <emphasis role="strong">init</emphasis>, determinez comment les
+                paramètres passés dans le grub sont récupérés et utilisés.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 12</emphasis> : <emphasis>Modifiez le fichier <emphasis role="strong">init</emphasis> en rajoutant par exemple des print
+                puis recompressez le RFS pour obtenir une initrd
+                <emphasis role="strong">custominitrd.img</emphasis>. Grâce aux droits root, copiez
+                <emphasis role="strong">custominitrd.img</emphasis> dans le répertoire /boot.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 13</emphasis> : <emphasis>Rebootez la machine puis utilisez <emphasis role="strong">e</emphasis> pour rentrer dans le menu
+                de configuration de grub. Modifiez les paramètres de boot pour
+                utiliser <emphasis role="strong">custominitrd.img</emphasis> au lieu de l&#8217;image initiale et
+                laissez seulement les paramètres kernel <emphasis role="strong">root=&#8230;</emphasis> et <emphasis role="strong">ro</emphasis>.
+                Démarrez et observez vos messages lors de la phase de boot.</emphasis></simpara>
+</section>
+<section id="_exercice_2_dev_sys_et_modules">
+<title>Exercice 2 : /dev, /sys et modules</title>
+<simpara>Comme vu dans les TP précédents, les ports séries sont disponibles à travers
+des fichiers spéciaux présents dans le /dev. Il existe de nombreux outils
+permettant de lire et écrire sur ces ports. Nous allons ici étudier l&#8217;outil
+minicom.</simpara>
+<simpara>Dans un premier temps, compilez et exécutez le simulateur GPS de embsys :</simpara>
+<screen>&gt; cd labs/gps
+&gt; make ok
+&gt; sh run.sh</screen>
+<simpara><emphasis role="strong">Question 14</emphasis> : <emphasis>Quel est le type de périphérique (block ou char) d&#8217;un port
+                série? Comment le vérifiez vous à travers le /dev?</emphasis></simpara>
+<simpara><emphasis role="strong">Question 15</emphasis> : <emphasis>Confirmez en étudiant le contenu du répertoire /sys/dev/.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 16</emphasis> : <emphasis>Grâce à l&#8217;aide de minicom (<emphasis role="strong">minicom -h</emphasis>), connectez vous au
+                port du simulateur et observez les trames passer.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 17</emphasis> : <emphasis>Étudiez les possiblités de minicom à travers son menu de
+                configuration et faites un log des trames dans un fichier
+                minicom.log.</emphasis></simpara>
+<simpara>Chaque fichier spécial du /dev est associé à un numéro majeur permettant au
+kernel de connaître le driver à utiliser. Par exemple :</simpara>
+<screen>&gt; ls -l /dev/sfa[1-8]
+v
+brw-rw---- 1 root disk 8, 1 déc.  14 21:07 /dev/sda1
+brw-rw---- 1 root disk 8, 2 déc.  14 21:07 /dev/sda2
+brw-rw---- 1 root disk 8, 3 déc.  14 21:07 /dev/sda3
+brw-rw---- 1 root disk 8, 4 déc.  14 21:07 /dev/sda4
+brw-rw---- 1 root disk 8, 5 déc.  14 21:07 /dev/sda5
+brw-rw---- 1 root disk 8, 6 déc.  14 21:07 /dev/sda6
+brw-rw---- 1 root disk 8, 7 déc.  14 21:07 /dev/sda7</screen>
+<simpara>On voit ici que le numéro majeur correspondant au support de stockage est le
+8. D&#8217;après la documentation kernel <ulink url="https://www.kernel.org/doc/Documentation/devices.txt">https://www.kernel.org/doc/Documentation/devices.txt</ulink>
+et grâce à ce numéro, on retrouve le fait que le matériel sous jacent est bien
+un disque.</simpara>
+<simpara><emphasis role="strong">Question 18</emphasis> : <emphasis>Connectez le matériel distribué en TP et regardez l&#8217;influence
+                dans le /dev. Que se passe t-il? Observez les messages kernel.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 19</emphasis> : <emphasis>Déterminez le type de matériel à partir du numéro majeur et
+                grâce à la documentation kernel.</emphasis></simpara>
+<simpara>Le /sys, grâce au mécanisme de hotplug, est mis à jour par le kernel. Suite à
+cela, le kernel envoi des uevent dans l&#8217;espace utilisateur. Ces évènements sont
+écoutés par udev qui met alors à jour le /dev. On peut notamment retrouver dans
+le /sys le driver utilisé par un matériel défini dans le /dev. Par exemple
+pour un disque :</simpara>
+<screen>&gt; ls -l /dev/ttyS0
+crw-rw---- 1 root dialout 4, 64 déc.  14 21:07 /dev/ttyS0
+&gt; ls /sys/dev/char/4:64/device/driver/
+bind  serial8250  uevent  unbind</screen>
+<simpara>On voit ici que le driver utilisé se nomme serial8250.</simpara>
+<simpara>Nous allons maintenant étudier les modules kernel. Ces modules sont situés
+dans le répertoire /lib/modules/$(uname -r)/kernel sous forme de fichiers
+ayant l&#8217;extension <emphasis role="strong">.ko</emphasis>.</simpara>
+<simpara><emphasis role="strong">Question 20</emphasis> : <emphasis>De la même manière que ci-dessus, déterminez le driver kernel
+                utilisé pour gérer l&#8217;adaptateur branché à la question 18.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 21</emphasis> : <emphasis>En analysant le fichier de configuration du kernel présent dans
+                le /boot, déterminez s&#8217;il s&#8217;agit d&#8217;un driver fourni en module
+                ou non. S&#8217;il s&#8217;agit d&#8217;un module, trouvez le fichier .ko
+                associé.</emphasis></simpara>
+<simpara>Les dépendances entre modules sont définies dans le fichier
+/lib/module/$(uname -r)/modules.dep.</simpara>
+<simpara><emphasis role="strong">Question 22</emphasis> : <emphasis>En regardant dans ce fichier, déterminez la/les dépendance(s)
+                du driver utilisé pour gérer l&#8217;adaptateur précédemment connecté.</emphasis></simpara>
+<simpara>La commande <emphasis role="strong">lsmod</emphasis> permet de lister les drivers modules actuellement chargés
+et indique le nombre de modules dépendants.</simpara>
+<simpara><emphasis role="strong">Question 23</emphasis> : <emphasis>Grâce à cette commande, vérifiez la réponse de la question
+                22.</emphasis></simpara>
+<simpara>La commande <emphasis role="strong">rmmod</emphasis> permet de décharger un module.</simpara>
+<simpara><emphasis role="strong">Question 24</emphasis> : <emphasis>Que se passe t-il si vous essayez d&#8217;utiliser rmmod sur le
+                module dont dépend le driver de l&#8217;adaptateur?</emphasis></simpara>
+<simpara><emphasis role="strong">Question 25</emphasis> : <emphasis>Utilisez rmmod sur le module driver de l&#8217;adaptateur et vérifiez
+                l&#8217;effet dans le /dev.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 26</emphasis> : <emphasis>Quelle est la différence entre la commande modprobe et la
+                commande insmod?</emphasis></simpara>
+<simpara><emphasis role="strong">Question 27</emphasis> : <emphasis>Utilisez une de ces commandes pour recharger le module de
+                l&#8217;adaptateur et vérifiez l&#8217;effet dans le /dev.</emphasis></simpara>
+</section>
+<section id="_exercice_3_etc_udev_et_syslog">
+<title>Exercice 3 : /etc, udev et syslog</title>
+<simpara>Contrairement à beaucoup de système UNIX, il n&#8217;y a pas de représentation du
+matériel réseau dans /dev sous Linux.</simpara>
+<simpara>Par exemple, on peut récupérer les interfaces réseau grâce à la commande
+suivante :</simpara>
+<screen>&gt; /sbin/ifconfig
+eth0: flags=4099&lt;UP,BROADCAST,MULTICAST&gt;  mtu 1500
+        ether 48:5b:39:0b:10:82  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+wlan0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+        inet 192.168.1.12  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::226:5eff:fe02:27ac  prefixlen 64  scopeid 0x20&lt;link&gt;
+        ether 00:26:5e:02:27:ac  txqueuelen 1000  (Ethernet)
+        RX packets 40820  bytes 26045057 (24.8 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 39619  bytes 5521236 (5.2 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</screen>
+<simpara>Il y a donc deux interfaces réseau : <emphasis role="strong">wlan0</emphasis> et <emphasis role="strong">eth0</emphasis>. Mais il n&#8217;y a aucun
+fichier /dev/eth0 ou /dev/wlan0. Cependant, c&#8217;est quand même <emphasis role="strong">udev</emphasis> qui gère
+ces interfaces.</simpara>
+<simpara><emphasis role="strong">Question 28</emphasis> : <emphasis>De la même manière que ci-dessus, déterminez les différentes
+                interfaces réseau présentes sur votre machine ainsi que les
+                addresses MAC associées.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 29</emphasis> : <emphasis>Que pouvez vous dire du contenu du fichier
+                /etc/udev/rules.d/70-persistent-net.rules? Selon vous, à quel
+                moment sont utilisées ces règles?</emphasis></simpara>
+<simpara>Il existe un moniteur d'évènements fourni par udev et utilisable comme suit :</simpara>
+<screen>&gt; udevadm monitor</screen>
+<simpara><emphasis role="strong">Question 30</emphasis> : <emphasis>Lancez le moniteur puis branchez / débranchez l&#8217;adaptateur
+                distribué ou bien une simple clé USB. Qu&#8217;observez vous?</emphasis></simpara>
+<simpara><emphasis role="strong">Question 31</emphasis> : <emphasis>Localisez un fichier <emphasis role="strong">uevent</emphasis> dans le répertoire /sys puis
+                simulez un évènement d&#8217;ajout de matériel avec la commande
+                <emphasis role="strong">echo "add" &gt; /sys/&#8230;./uevent</emphasis>. Que dit le moniteur de udev?</emphasis></simpara>
+<simpara>Le kernel envoi des messages dans l&#8217;espace utilisateur notamment par des sockets
+Netlink. Ce type de socket est utilisé pour établir une communication IPC entre
+le kernel et les processus de l&#8217;espace utilisateur. Pour ouvrir un tel socket
+en C :</simpara>
+<screen>#include &lt;linux/types.h&gt;
+#include &lt;linux/netlink.h&gt;
+
+...
+...
+
+struct sockaddr_nl nls;
+memset(&amp;nls,0,sizeof(struct sockaddr_nl));
+nls.nl_family = AF_NETLINK;
+nls.nl_pid = getpid();
+nls.nl_groups = -1;
+
+...
+...
+
+int fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT);
+
+...
+...</screen>
+<simpara><emphasis role="strong">Question 32</emphasis> : <emphasis>À partir de l'ébauche précédente permettant d&#8217;ouvrir un socket
+                Netlink, écrivez un code permettant de lire les messages envoyés
+                par le kernel à l&#8217;aide des fonctions <emphasis role="strong">bind</emphasis>, <emphasis role="strong">select</emphasis> et <emphasis role="strong">recv</emphasis>.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 33</emphasis> : <emphasis>Utilisez syslog pour logger dans /var/log et dans le terminal
+                le path du device ajouté dans le /dev ainsi que le driver
+                utilisé.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 34</emphasis> : <emphasis>Testez votre code en connectant par exemple une clé USB.
+                Observez le driver utilisé, les numéros majeur/mineur, etc&#8230;</emphasis></simpara>
+<simpara><emphasis role="strong">Question 35</emphasis> : <emphasis>Vérifiez dans le fichier correspondant de /var/log l&#8217;effet
+                du syslog.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 36</emphasis> : <emphasis>Créez un script dans /etc/init.d afin que votre code soit
+                exécuté dès le boot de la machine.</emphasis></simpara>
+<simpara><emphasis role="strong">Question 37</emphasis> : <emphasis>Écrivez une règle udev permettant d&#8217;obtenir un fichier spécial
+                /dev/ttyADAPTER plutôt que /dev/ttyUSB0. Vérifiez le
+                fonctionnement grâce à votre code de récupération
+                d'évènements uevent.</emphasis></simpara>
+</section>
+</article>

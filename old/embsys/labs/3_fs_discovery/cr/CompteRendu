@@ -1,0 +1,130 @@
+= Exercise 6 & 7 : Contractor and Separator
+:author: AUTRET Elouan
+:encoding: utf-8
+
+
+== Exercise 6 : Forward-Backward contractor
+
+
+
+*Response 1* : 
+
+See *myring.py* file.
+
+*Response 2* : By using the contrator in sivia at each step we can keep  only the outer box
+ 
+[source,python]
+-----
+def siviaContract(X,cx,cy,r, epsilon=0.01):
+    """SIVIA algorithm based on the contractor CinRing.
+    """
+    # TODO based on Exercise 4, implement a SIVIA algorithm which uses your own contractor CinRing 
+    if (X.width()<epsilon):
+        vibes.drawBox(X.x.lb, X.x.ub, X.y.lb, X.y.ub, 'yellow[yellow]') # draw X
+        return
+    X = CinRing(X, cx,cy, r)
+...
+-----
+
+The result :
+
+image::Contractor_exo6_cinring.png["ResultSivia",height=300,title="Result Sivia and contractor",align="center"]
+
+<<<
+<<<
+<<<
+
+== Exercise 7 : Separator
+
+*Response 1* :
+
+[source,python]
+-----
+def SinRing(X, cx, cy, r):
+    A = CinRing(X,cx,cy,r)
+    Bl= CinRing(X,cx,cy,Interval(0,r.lb))
+    Bu= CinRing(X,cx,cy,Interval(r.ub,oo))
+    B = Bl | Bu
+    return A,B
+-----
+In Bl the *r* interval is not [-oo,r.lb] because it is a distance so we can reduce
+the interval to positive values. +
+
+*Response 2* : +
+
+[source,python]
+-----
+def SepInter(X):    
+
+    # => Complementary of intersection = union of complementaries
+    A1,B1 = SinRing(X,Interval(1,1),Interval(2,2),Interval(4,5))
+    A2,B2 = SinRing(X,Interval(2,2),Interval(5,5),Interval(5,6))
+    A =  A1 & A2
+    B = B1 | B2
+    return A,B
+
+def siviaSepInter(X, epsilon=0.5):
+    """SIVIA algorithm based on the separator sepInter.
+    """
+    if (X.width()<epsilon):
+        vibes.drawBox(X.x.lb, X.x.ub, X.y.lb, X.y.ub, 'yellow[yellow]') # draw X
+        return
+    elif X.is_empty():
+        return
+    X,Y = SepInter(X)
+    
+    vibes.drawBox(Y.x.lb, Y.x.ub, Y.y.lb, Y.y.ub, '[blue]')
+   
+    vibes.drawBox(X.x.lb, X.x.ub, X.y.lb, X.y.ub, '[red]')
+    X = X&Y
+    siviaSepInter(X.left(), epsilon)
+    siviaSepInter(X.right(),epsilon)
+-----
+
+We have to check if X is empty because we are doing intersection on X during the intersection of the separators.
+
+_As the code is written only the graphical part is correct, indeed we only draw boxes over boxes, we draw blue box over red boxes so what we store as X- is incorrect._
+ 
+image::sep_inter.png["ResultSiviaInter",height="250",title="Result Sivia with S=S1∩S2",align="center"]
+
+*Response 3* : +
+
+[source,python]
+-----
+def SepUnion(X):    
+
+    # => Complementary of intersection = union of complementaries
+    A1,B1 = SinRing(X,Interval(1,1),Interval(2,2),Interval(4,5))
+    A2,B2 = SinRing(X,Interval(2,2),Interval(5,5),Interval(5,6))
+    A =  A1 | A2
+    B = B1 & B2
+    return A,B
+
+def siviaSepUnion(X, epsilon=0.5):
+    """SIVIA algorithm based on the separator sepInter.
+    """
+    if (X.width()<epsilon):
+        vibes.drawBox(X.x.lb, X.x.ub, X.y.lb, X.y.ub, 'yellow[yellow]') # draw X
+        return
+    elif X.is_empty():
+        return
+    X,Y = SepUnion(X)
+    
+    vibes.drawBox(Y.x.lb, Y.x.ub, Y.y.lb, Y.y.ub, '[blue]')
+   
+    vibes.drawBox(X.x.lb, X.x.ub, X.y.lb, X.y.ub, '[red]')
+    X = X&Y
+    siviaSepUnion(X.left(), epsilon)
+    siviaSepUnion(X.right(),epsilon)
+-----
+
+
+
+image::sep_union.png["ResultSiviaUnion",height="250",title="Result Sivia with S=S1∪S2",align="center"]
+
+
+We can see too circle corresponding to S1 and S2
+
+image::inter_and_union.png["ResultSiviaUnion",height="250",title="S=S1∩S2 S=S1∪S2",align="center"]
+
+We can see that the the left figure represent the inteserction on S1 and S2.
