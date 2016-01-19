@@ -2,6 +2,12 @@
 
 export file_name=sda                  
 
+export led21=/sys/class/gpio
+
+echo 21 > $led21/export
+echo out > $led21/gpio21/direction
+
+
 cd /dev
 
 while ! [ -e $file_name ]
@@ -18,10 +24,6 @@ sh /root/blink_long.sh
 
 sleep 1
 
-export led21=/sys/class/gpio
-
-echo 21 > $led21/export
-echo out > $led21/gpio21/direction
 echo 1 > $led21/gpio21/value
 
 sleep 1
@@ -43,6 +45,6 @@ echo 0 > $led21/gpio21/value
 
 
 #relaunch the detection code
-#/root/detec_key.sh &
+sh /root/detec_key.sh &
 
 exit 0

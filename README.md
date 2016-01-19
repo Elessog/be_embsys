@@ -9,5 +9,5 @@ The script is executed automatically.
 # V0.1
 Adding a script to detect the USB flash drive.
 This script indicates when the flash drive can be removed by blinking fastly three times.
-The script must be executed with the command : ./detect_key.sh before plugging the flash drive in.
+The script is automatically launched thanks to the /etc/init.d/S99.app
 
