@@ -12,37 +12,56 @@ cd /dev
 
 while ! [ -e $file_name ]
 do
-sleep 1
+echo 1 > $led21/gpio21/value
+sleep 2
+echo 0 > $led21/gpio21/value
+sleep 2
 done
 
 mount /dev/sda1 /mnt/keyUSB
+
 echo "detection of an USB key"
+
+
+#sh /root/blink_long.sh &
+
+n=1
+while [ $n -le 5 ]
+do
+	echo 1 > $led21/gpio21/value
+	sleep 1
+	echo 0 > $led21/gpio21/value
+	sleep 1
+	n=$(( n+1 ))	 # increments $n
+done
+
+echo 1 > $led21/gpio21/value
+
+export time=200000
+
+usleep $time
+echo 0 > $led21/gpio21/value
+
+
+usleep $time
+echo 1 > $led21/gpio21/value
+
+usleep $time       
+echo 0 > $led21/gpio21/value
+
+
+usleep $time
+echo 1 > $led21/gpio21/value
+
+usleep $time
+echo 0 > $led21/gpio21/value
 
 umount /mnt/keyUSB
 
-sh /root/blink_long.sh
-
+while [ -e $file_name ]
+do
 sleep 1
-
-echo 1 > $led21/gpio21/value
-
-sleep 1
-echo 0 > $led21/gpio21/value
-
-
-sleep 1
-echo 1 > $led21/gpio21/value
-
-sleep 1           
-echo 0 > $led21/gpio21/value
-
-
-sleep 1
-echo 1 > $led21/gpio21/value
-
-sleep 1
-echo 0 > $led21/gpio21/value
-
+done  
 
 #relaunch the detection code
 sh /root/detec_key.sh &
