@@ -1,0 +1,33 @@
+#!/bin/sh
+# /etc/init.d/S99app
+
+### BEGIN INIT INFO
+#Default-Start:	2 3 4 5
+#Default-Stop:	0 1 6
+#Short-Description:	Launch detect_key.sh script
+#Description:	This service detect the insertion of an USB key and crypte a folder on it
+### END INIT INFO
+
+led21=/sys/class/gpio
+
+case "$1" in
+	start)
+		echo "Start Key Detection Deamon..."
+		/home/pi/be_embsys/detect_key.sh &
+		;;
+	stop)
+		echo "Stopping detect_key daemon"
+		ps -aux | grep -ie detect_key.sh | awk '{print $2}' | xargs kill
+		echo 0 > $led21/gpio21/value
+		echo 21 > $led21/unexport
+		;;
+        status)
+		status detect_key.sh
+		;;
+	*)
+		echo $"Usage : $0 {start|stop|status}"
+		exit 1
+esac
+
+
+exit 0
