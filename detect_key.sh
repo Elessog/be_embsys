@@ -2,6 +2,7 @@
 
 export file_name=/dev/sda
 export this_file_path=/home/pi/be_embsys
+export key_path=/media/pi/AEGIS
 
 export led21=/sys/class/gpio
 
@@ -18,22 +19,20 @@ do
 	sleep 2
 done
 
-mount /dev/sda1 /mnt/keyUSB
+mount /dev/sda1 $key_path
 
 echo "detection of an USB key"
 
+touch $this_file_path/tempFile.xyz
+sh $this_file_path/blink_long.sh &
 
-#sh /root/blink_long.sh &
+#execution of cryptographie
+if [ -d $key_path/toCryptFolder ]
+then
+	find $key_path/toCryptFolder -type f | xargs -I '{}' sh -c '$this_file_path/a.out {} {}crypt' \;
+fi
 
-n=1
-while [ $n -le 5 ]
-do
-	echo 1 > $led21/gpio21/value
-	sleep 1
-	echo 0 > $led21/gpio21/value
-	sleep 1
-	n=$(( n+1 ))	 # increments $n
-done
+rm $this_file_path/tempFile.xyz
 
 echo 1 > $led21/gpio21/value
 
@@ -56,7 +55,7 @@ echo 1 > $led21/gpio21/value
 usleep $time
 echo 0 > $led21/gpio21/value
 
-umount /mnt/keyUSB
+umount $key_path
 
 while [ -e $file_name ]
 do

@@ -9,11 +9,12 @@
 ### END INIT INFO
 
 led21=/sys/class/gpio
+file_exe_path=/home/pi/be_embsys
 
 case "$1" in
 	start)
 		echo "Start Key Detection Deamon..."
-		/home/pi/be_embsys/detect_key.sh &
+		$file_exe_path/detect_key.sh &
 		;;
 	stop)
 		echo "Stopping detect_key daemon"

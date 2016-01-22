@@ -42,7 +42,9 @@ int main(int args, char* argv[])
 {
     if (args!=3)
     {
-       printf("Usage: %s fileIn fileout",argv[0]);
+       printf("Usage: %s fileIn fileout\n",argv[0]);
+       if (args==2)
+           printf("second arg : %s\n",argv[1]);
        exit(EXIT_FAILURE);
     }
 
