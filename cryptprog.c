@@ -16,16 +16,17 @@
 char* decrypt(char* input,char* output)
 {
 
-	char key[] = {'K', 'C', 'Q'}; //Can be any chars, and any size array
-	
-	int i;
-    printf("%d",(int)strlen(input));
-	for(i = 0; i < strlen(input); i++) {
-        printf("%c",input[i]);
-		output[i] = input[i] ^ key[i % (sizeof(key)/sizeof(char))];
-	}
+    char key[] = {'K', 'C', 'Q'}; //Can be any chars, and any size array
 
-	return output;
+    int i;
+    printf("%d",(int)strlen(input));
+    for(i = 0; i < strlen(input); i++)
+    {
+        printf("%c",input[i]);
+        output[i] = input[i] ^ key[i % (sizeof(key)/sizeof(char))];
+    }
+
+    return output;
 }
 
 int fileManage(char* nameIn, char *nameOut){
@@ -46,7 +47,7 @@ int fileManage(char* nameIn, char *nameOut){
     while(read(fd_in, buffer, SIZE_OF_BUFF) > 0)
     {
       printf("1\n");
-	  char cryptedBuffer[SIZE_OF_BUFF];
+      char cryptedBuffer[SIZE_OF_BUFF];
       memset(cryptedBuffer,'\0',SIZE_OF_BUFF);
       printf("2\n");
       decrypt(buffer,cryptedBuffer);
@@ -58,12 +59,10 @@ int fileManage(char* nameIn, char *nameOut){
       write(fd_out,toWrite,strlen(toWrite));
       printf("5\n");
     }
-      
     close(fd_in);
     close(fd_out);
 
     return 0;
-    
 }
 
 int main(int argc,char *argv[]){

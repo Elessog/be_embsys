@@ -4,9 +4,9 @@
 
 void encryptDecrypt(char *input, char *output) {
 	char key[] = {'K', 'C', 'Q'}; //Can be any chars, and any size array
-	
+
 	int i;
-	for(i = 0; i < strlen(input); i++) {
+	for(i = 0; i < strlen(input) ; i++) {
 		output[i] = input[i] ^ key[i % (sizeof(key)/sizeof(char))];
 	}
 }
@@ -22,27 +22,30 @@ int main(int args, char* argv[])
 	fileIn = fopen(argv[1], "r");
 	if (fileIn == NULL)
 	{
-		printf("Error while loading input file\n");
-		exit(EXIT_FAILURE);
+	    printf("Error while loading input file\n");
+	    exit(EXIT_FAILURE);
 	}
 
 	fileOut = fopen(argv[2], "w+");
 	if (fileOut == NULL)
 	{
-		printf("Error while loading output file\n");
-		exit(EXIT_FAILURE);
+            printf("Error while loading output file\n");
+	    exit(EXIT_FAILURE);
 	}
 
 	while ((read = getline(&line, &len, fileIn)) != -1)
 	{
-		printf("Retrieved line of length %zu :\n", read);
-		printf("%s", line);
-		char decrypted[len];
-		encryptDecrypt(line, decrypted);
-		fputs(decrypted, fileOut);
+            printf("Retrieved line of length %zu :\n", read);
+            //printf("%s", line);
+            char decrypted[read+2];
+            decrypted[read] = '\0';
+            decrypted[read+1]='\0';
+            encryptDecrypt(line, decrypted);
+            //printf("%d",len);
+            fputs(decrypted, fileOut);
 	}
 
-	fclose(fileIn);
+        fclose(fileIn);
 	fclose(fileOut);
 	if (line)
 	   free(line);
