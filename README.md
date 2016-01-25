@@ -6,6 +6,7 @@ Repository for pratical exam
 If its the first time you install via the key:
 
 On the Armadeus:
+
         mkdir -p /mnt/keyUSB
         mount /dev/sda1 /mnt/keyUSB
         source /mnt/keyUSB/autoupdate.sh
