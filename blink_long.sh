@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export this_file_path=/home/pi/be_embsys
+export this_file_path=/root
 
 while [ -e $this_file_path/tempFile.xyz ];
 do

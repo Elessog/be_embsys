@@ -9,7 +9,9 @@
 ### END INIT INFO
 
 led21=/sys/class/gpio
-file_exe_path=/home/pi/be_embsys
+file_exe_path=/root
+
+mkdir -p /mnt/keyUSB
 
 case "$1" in
 	start)
@@ -18,7 +20,7 @@ case "$1" in
 		;;
 	stop)
 		echo "Stopping detect_key daemon"
-		ps -aux | grep -ie detect_key.sh | awk '{print $2}' | xargs kill
+		ps aux | grep -ie detect_key.sh | awk '{print $1}' | xargs kill
 		echo 0 > $led21/gpio21/value
 		echo 21 > $led21/unexport
 		;;

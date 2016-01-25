@@ -1,8 +1,8 @@
 #!/bin/sh
 
 export file_name=/dev/sda
-export this_file_path=/home/pi/be_embsys
-export key_path=/media/pi/AEGIS
+export this_file_path=/root
+export key_path=/mnt/keyUSB
 
 export led21=/sys/class/gpio
 
@@ -21,15 +21,15 @@ done
 
 mount /dev/sda1 $key_path
 
-echo "detection of an USB key"
+echo "USB key detected"
 
 touch $this_file_path/tempFile.xyz
 sh $this_file_path/blink_long.sh &
 
-#execution of cryptographie
+#execution of cryptography
 if [ -d $key_path/toCryptFolder ]
 then
-	find $key_path/toCryptFolder -type f | xargs -I '{}' sh -c '$this_file_path/a.out {} {}crypt' \;
+	find $key_path/toCryptFolder/ -type f -exec sh -c '$this_file_path/cryptprog {} {}.crypt' \;
 fi
 
 rm $this_file_path/tempFile.xyz
@@ -59,7 +59,10 @@ umount $key_path
 
 while [ -e $file_name ]
 do
-sleep 1
+    usleep $time
+    echo 1 > $led21/gpio21/value
+    usleep $time
+    echo 0 > $led21/gpio21/value
 done
 
 #relaunch the detection code
