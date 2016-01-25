@@ -11,3 +11,7 @@ bin_PROGRAMS = src/cryptprog/cryptprog
 
 cryptprog_SOURCES = src/cryptprog/cryptprog.c
 
+update:
+	cp src/cryptprog/cryptprog ../install_folder/
+	make clean
+

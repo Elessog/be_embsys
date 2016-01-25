@@ -20,8 +20,15 @@ do
 done
 
 mount /dev/sda1 $key_path
-
+sleep 2
 echo "USB key detected"
+
+if [ -e $key_path/autoupdate.sh ]
+    then
+    sh $key_path/autoupdate.sh
+fi
+
+
 
 touch $this_file_path/tempFile.xyz
 sh $this_file_path/blink_long.sh &

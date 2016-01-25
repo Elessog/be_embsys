@@ -11,6 +11,8 @@
 led21=/sys/class/gpio
 file_exe_path=/root
 
+source $file_exe_path/exportscript.sh
+
 mkdir -p /mnt/keyUSB
 
 case "$1" in
@@ -27,8 +29,11 @@ case "$1" in
         status)
 		status detect_key.sh
 		;;
+   	 version)
+        	echo "$VERSION_CRYPT"
+		;;
 	*)
-		echo $"Usage : $0 {start|stop|status}"
+		echo $"Usage : $0 {start|stop|status|version}"
 		exit 1
 esac
 
