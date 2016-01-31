@@ -1,16 +1,11 @@
 # be_embsys
 Repository for pratical exam
 
-# V1.4
+# V1.5
 
-**UPDATE FROM 1.3**:
+**UPDATE FROM 1.4**:
 
-Possibility to change the crypting key. The key is now in:
-
-		/etc/cryptkey.conf
-
-Change this file to change the key.
-
+Add syslog messages from the __cryptprog__ program.
 
 #How to use
 
