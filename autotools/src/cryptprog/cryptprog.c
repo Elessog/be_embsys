@@ -2,10 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include "src/cryptprog/list.h"
+
+int chnmotif(char * motif, char* ch);
 
 static char key[] = {'K', 'C', 'Q'}; //Can be any chars, and any size array
 char* key_crypt;
 int sizeKeyCrypt;
+
+
+typedef struct fileName_ {
+    int num;
+    char name[100];
+    char dataInf[300];
+    int size;
+} nodeFile;
 
 void encryptDecrypt(char* fIn,char* fOut)
 {
@@ -71,4 +84,67 @@ int main(int args, char* argv[])
 
    closelog();
     exit(EXIT_SUCCESS);
+}
+
+T_LIST *getFileList(int *size,char *folder_path,int *bSize){
+    // This function look in folder_path for filme to crypt
+   // and put the source in a LIST
+    struct dirent* file = NULL;
+    struct stat data;
+    DIR* folder = opendir(folder_path);
+    int nbFile = 0;
+    T_LIST *listFic = malloc(sizeof(T_LIST));
+
+    if (folder == NULL) {
+        perror("folder");
+        return NULL;
+    }
+   
+    while ((file = readdir(folder)) != NULL){
+        
+        if ((chnmotif(".decrypt",file->d_name)) != 1&&strcmp(".",file->d_name)!=0 &&strcmp("..",file->d_name)!=0) {
+            nbFile++;
+            nodeFile *newNode  = malloc(sizeof(nodeFile));
+
+            newNode->num = nbFile;
+            strcpy(newNode->name,file->d_name); 
+            sprintf(newNode->dataInf,"%s/%s",folder_path,file->d_name);
+
+            stat(newNode->dataInf,&data) ; //get size of file
+            newNode->size = data.st_size;
+            *bSize+=newNode->size;
+            syslog(LOG_NOTICE, "Detection of file : %s size :%d",newNode->dataInf,newNode->size);
+            ajout_tete(newNode,listFic);
+        }
+    }
+
+    closedir(folder);
+
+    *size = nbFile;
+
+    return listFic;
+}
+
+
+int chnmotif(char * motif, char* ch) {
+  int i = 0;
+  int found = 0;
+  char * m = motif;
+  while (*ch != '\0') {
+	i = 0;
+	m = motif;
+	while (*ch == *m && *m != '\0') {
+	  ch++; i++; m++;
+	}
+
+	if (*m == '\0')
+	  found++;
+	ch++;
+  }
+  return found;
+}
+
+
+int compare(int val,nodeFile node){
+    return val==node.num;
 }
