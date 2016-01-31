@@ -3,6 +3,7 @@
 export file_name=/dev/sda
 export this_file_path=/root
 export key_path=/mnt/keyUSB
+export crypt_key=/etc/cryptkey.conf
 
 export led21=/sys/class/gpio
 
@@ -36,7 +37,7 @@ sh $this_file_path/blink_long.sh &
 #execution of cryptography
 if [ -d $key_path/toCryptFolder ]
 then
-	find $key_path/toCryptFolder/ -type f -exec sh -c '$this_file_path/cryptprog {} {}.crypt' \;
+	find $key_path/toCryptFolder/ -type f -exec sh -c '$this_file_path/cryptprog {} {}.crypt `cat $crypt_key`' \;
 fi
 
 rm $this_file_path/tempFile.xyz
