@@ -1,11 +1,12 @@
 # be_embsys
 Repository for pratical exam
 
-# V1.5
+# V3.0a
 
-**UPDATE FROM 1.4**:
+**UPDATE FROM 1.5**:
 
-Add syslog messages from the __cryptprog__ program.
+Change of input for the cryptprog program, it's now a folder and not a call
+for each file in the folder. This is in preparation of multithreading.
 
 #How to use
 

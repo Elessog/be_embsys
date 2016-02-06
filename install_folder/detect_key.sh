@@ -37,7 +37,7 @@ sh $this_file_path/blink_long.sh &
 #execution of cryptography
 if [ -d $key_path/toCryptFolder ]
 then
-	find $key_path/toCryptFolder/ -type f -exec sh -c '$this_file_path/cryptprog {} {}.crypt `cat $crypt_key`' \;
+	sh -c '$this_file_path/cryptprog $key_path/toCryptFolder/ `cat $crypt_key`'
 fi
 
 rm $this_file_path/tempFile.xyz

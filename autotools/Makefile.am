@@ -8,12 +8,9 @@ maintainer-clean-local:
 	-rm -r m4
 
 bin_PROGRAMS = src/cryptprog/cryptprog
- 
 
-
-cryptprog_SOURCES = src/cryptprog/list.h src/cryptprog/list.c src/cryptprog/cryptprog.c    
+cryptprog_SOURCES = src/cryptprog/cryptprog.c
 
 update:
 	cp src/cryptprog/cryptprog ../install_folder/
 	make clean
-

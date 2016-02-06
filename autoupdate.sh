@@ -2,7 +2,7 @@
 
 install_folder=/mnt/keyUSB/install_folder
 
-VERSIONUSB=15
+VERSIONUSB=29
 
 if [ -z "$VERSION_CRYPT" ]
 then
