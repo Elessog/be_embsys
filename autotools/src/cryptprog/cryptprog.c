@@ -12,6 +12,7 @@
 
 int chnmotif(char * motif, char* ch);
 int freeThread(int *status,int size);
+int alreadyTreated(char *fileName,char *rep);
 void feed(int size);
 void *cryptingThread(void *arg);
 
@@ -66,7 +67,7 @@ void encryptDecrypt(char* fIn,char* fOut)
             fputc(decrypted, fileOut);
 	}
         syslog(LOG_NOTICE, "End (de)crypting %s in %s . Number of Bytes : %d",fIn,fOut,i);
-
+        fflush(fileOut);
         fclose(fileIn);
 	fclose(fileOut);
 }
@@ -88,7 +89,6 @@ int main(int args, char* argv[])
            printf("second arg : %s\n",argv[1]);
        exit(EXIT_FAILURE);
     }
-    //printf ("%s %d\n",key_crypt,strlen(key_crypt));
     sizeKeyCrypt = strlen(key_crypt);
 
     //encryptDecrypt(argv[1],argv[2]);//encrypàt or decrypt the file
@@ -103,10 +103,11 @@ int main(int args, char* argv[])
         perror("folder");
         return;
     }
-   
+   //get number of file to work on 
     while ((file = readdir(folder)) != NULL){
         if ((chnmotif(".decrypt",file->d_name)) != 1&&strcmp(".",file->d_name)!=0 
-              &&strcmp("..",file->d_name)!=0&&file->d_type!=DT_DIR)
+              &&strcmp("..",file->d_name)!=0&&file->d_type!=DT_DIR&&
+                                                     alreadyTreated(file->d_name,folder_path)==0)
        {
             nbFile++;
         }
@@ -119,19 +120,18 @@ int main(int args, char* argv[])
     fileNameOut =  malloc(nbFile*sizeof(*fileNameOut));
     bSize = (int*) malloc(nbFile*sizeof(int));
 
-    nbFile = 0;
+    nbFile = 0;//get file to work on
     while ((file = readdir(folder)) != NULL){
         if ((chnmotif(".decrypt",file->d_name)) != 1&&strcmp(".",file->d_name)!=0 &&
-              strcmp("..",file->d_name)!=0&&file->d_type!=DT_DIR) 
+              strcmp("..",file->d_name)!=0&&file->d_type!=DT_DIR&&
+                                                   alreadyTreated(file->d_name,folder_path)==0) 
         {
             sprintf(fileName[nbFile],"%s/%s",folder_path,file->d_name);
-
             if (chnmotif(".crypt",file->d_name) >= 1)
             {
                char temp[STR_LEN];
                sscanf(file->d_name,"%s",temp);
                temp[strlen(file->d_name)-6] = '\0';
-               //printf("%s %s\n",temp,file->d_name);
                sprintf(fileNameOut[nbFile],"%s/%s.decrypt",folder_path,temp);
             }
             else
@@ -139,16 +139,14 @@ int main(int args, char* argv[])
 
             stat(fileName[nbFile],&data) ; //get size of file
             bSize[nbFile] = data.st_size;
-            syslog(LOG_NOTICE, "Detection of file : %s size :%d"
-                        ,fileName[nbFile],bSize[nbFile]);
-            printf("%s  %d\n",file->d_name,bSize[nbFile]);
+            printf("File %d :  %s,size %d\n",nbFile,file->d_name,bSize[nbFile]);
+            syslog(LOG_NOTICE,"File %d :  %s,size %d\n",nbFile,file->d_name,bSize[nbFile]);
             nbFile++;
         }
     }
     closedir(folder);
-    int i;
-    int ids[5] = {0,1,2,3,4};
 
+    int i;
     pthread_t thread[5];
     // init mutex
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -167,6 +165,7 @@ int main(int args, char* argv[])
  
     //launch feeding function
    feed(nbFile);
+
     for(i=0;i<5;i++)
     {
         //join thread
@@ -180,6 +179,31 @@ int main(int args, char* argv[])
     exit(EXIT_SUCCESS);
 }
 
+//checked if file has already been crypted or decrypted
+int alreadyTreated(char *fileName,char *rep){
+    struct dirent* file = NULL;
+    struct stat data;
+    DIR* folder = opendir(rep);
+    char temp[STR_LEN];
+    char temp2[STR_LEN];
+    sscanf(fileName,"%s",temp);
+    if (chnmotif(".crypt",fileName) >= 1){
+       temp[strlen(fileName)-6] = '\0';
+       sprintf(temp2,"%s.decrypt",temp);
+    }
+    else{
+       sprintf(temp2,"%s.crypt",fileName);
+    }
+    while ((file = readdir(folder)) != NULL)
+    {
+        if (strcmp(temp2,file->d_name)==0) {
+            closedir(folder) ; 
+           return 1;
+        }
+    }
+   closedir(folder) ;
+   return 0;
+}
 
 void feed(int size)
 {
@@ -195,7 +219,8 @@ void feed(int size)
        //send message to thread[freeT];
        char temp[10];
        sprintf(temp,"%d",fileDone);
-       printf("Send to Thread %d %s\n",freeT,temp);
+       printf("Send to Thread %d  file %s\n",freeT,temp);
+       syslog(LOG_NOTICE,"Send to Thread %d  file %s\n",freeT,temp);
        write(canal_father[freeT][1],temp,10);
        fileDone++;
        status[freeT]=1;
@@ -208,7 +233,7 @@ void feed(int size)
     int max = canal_son[0][0];
     for(k=0;k<5;k++){
        FD_SET(canal_son[k][0], &pdset);
-       MAX(max,canal_son[k][0]);
+       max = MAX(max,canal_son[k][0]);
     }
     select(max+1, &pdset, NULL, NULL, NULL);
 
@@ -216,6 +241,8 @@ void feed(int size)
     {
       if (FD_ISSET(canal_son[k][0], &pdset))
       {
+         printf("Thread %d is now free\n",k);
+         syslog(LOG_NOTICE,"Thread %d is now free\n",k);
          read(canal_son[k][0],&(mesaj_son[k]),1);
          status[k]=0;
       }
@@ -236,7 +263,6 @@ int freeThread(int *status,int size)
  {
     if (status[size-1]==0)
       return size-1;
-    //printf("%d %d\n",size-1);
     size--;
   }
   return -1;
@@ -246,8 +272,9 @@ void *cryptingThread(void *arg){
    struct HANDLERS *hand = (struct HANDLERS*)arg;
    pthread_mutex_t *mutex = hand->mutex;
    int id = hand->thread_id;
-   printf("Thread %d\n",id);
-  fd_set pdset;
+   printf("Thread %d is active\n",id);
+   syslog(LOG_NOTICE,"Thread %d is active\n",id);
+   fd_set pdset;
    while(1)
    {
       FD_ZERO(&pdset);
@@ -257,24 +284,28 @@ void *cryptingThread(void *arg){
       {
          read(canal_father[id][0],mesaj_father[id],10);
          int  idFile; 
-         int oldFile = 999999;
+         int oldFile = 9999999;
          sscanf(mesaj_father[id],"%d",&idFile);
          if (idFile==99999){
             free(hand);
             printf("Thread %d stopping\n",id);
+            syslog(LOG_NOTICE,"Thread %d stopping\n",id);
             return;
          }
-         else if (idFile=oldFile){
+         else if (idFile==oldFile){
             free(hand);
-            printf("Error Thread %d stopping\n",id);
+            printf("Error in pipe comThread %d stopping\n",id);
+            syslog(LOG_ERR,"Error in pipe com Thread %d stopping\n",id);
             return;
-        }
-        oldFile=idFile;
-         printf("Thread %d working on %s\n",id,fileName[idFile]);
+         }
+         oldFile=idFile;
+         printf("Thread %d now working on %s\n",id,fileName[idFile]);
+         syslog(LOG_NOTICE,"Thread %d now working on %s\n",id,fileName[idFile]);
          encryptDecrypt(fileName[idFile],fileNameOut[idFile]);
          printf("Thread %d finished working on %s\n",id,fileName[idFile]);
-         char c='\0';
-         write(canal_father[id][1],&c,10);
+         syslog(LOG_NOTICE,"Thread %d finished working on %s\n",id,fileName[idFile]);
+         char *c={'\0'};
+         write(canal_son[id][1],&c,1);
       }
    }
    free(hand);
