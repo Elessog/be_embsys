@@ -12,10 +12,7 @@ AM_CONFIG_HEADER([config.h])
 LT_INIT
 AC_ENABLE_SHARED
 
-# check headers
-AC_CHECK_HEADER(sys/socket.h, [],
-                [AC_MSG_ERROR(["Couldn't find sys/socket.h"])])
-
+AC_CHECK_LIB(pthread, pthread_create, [PTHREAD_LIBS+=-lpthread])
 
 # output files
 AC_CONFIG_FILES([Makefile])
