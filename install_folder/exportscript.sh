@@ -1,3 +1,3 @@
 #!/bin/sh
 
-export VERSION_CRYPT=29
+export VERSION_CRYPT=30

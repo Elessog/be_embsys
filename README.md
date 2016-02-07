@@ -1,12 +1,22 @@
 # be_embsys
 Repository for pratical exam
 
-# V3.0a
+# V3.0
 
 **UPDATE FROM 1.5**:
 
 Change of input for the cryptprog program, it's now a folder and not a call
-for each file in the folder. This is in preparation of multithreading.
+for each file in the folder.
+
+The files are now crypted and decrypted in different trheads (5 for now).
+Are they is some difficulties to compile with autotools, there is another compiling 
+procedure:
+
+		cd autotools/src/cryptprog
+		make
+		make update
+
+Change the compiler in autotools/src/cryptprog/Makefile to cross-compile.
 
 #How to use
 
@@ -21,7 +31,7 @@ On the Armadeus:
 
 The file autoupdate.sh compares the version on the USB key and the one on the Amadeus card. If both versions are equal, nothing is done. Otherwise the file autoupdate.sh update the version currently installed on the armadeus card.
 
-To compile the cryptprog programm (in console you must be in be_embsys):
+To compile the cryptprog program (in console you must be in be_embsys):
 
         cd autotools
         export PATH=$PATH:path_to_folder_of_crosscompiler
